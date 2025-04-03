@@ -1,0 +1,35 @@
+{
+  "name": "sticker-generator",
+  "version": "1.0.0",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sticker",
+    "ai",
+    "ideogram",
+    "generator"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "AI-powered sticker generator using Ideogram API",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "openai": "^4.91.1",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.4",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.17.30",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.2"
+  }
+}

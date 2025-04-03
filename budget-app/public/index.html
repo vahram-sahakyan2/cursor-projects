@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picsart AI Sticker Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff0099, #ff4d94);
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        .shape:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -2s;
+            background: linear-gradient(45deg, #ff0099, #6600ff);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, 50px) rotate(90deg); }
+            50% { transform: translate(0, 100px) rotate(180deg); }
+            75% { transform: translate(-50px, 50px) rotate(270deg); }
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.9);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-logo {
+            color: #ff0099;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #ff0099;
+        }
+
+        .nav-button {
+            background: #ff0099;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            background: #ff1aa3;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 2rem 2rem;
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4rem;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .hero-content {
+            flex: 1;
+            position: relative;
+        }
+
+        .hero-image {
+            flex: 1;
+            position: relative;
+            height: 500px;
+            background: url('https://cdn.pixabay.com/photo/2023/06/02/14/12/woman-8035772_1280.jpg') center/cover;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .hero-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,0,153,0.3), rgba(102,0,255,0.3));
+        }
+
+        .hero-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(45deg, #ffffff, #ff0099);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #cccccc;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 4rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #ff0099;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(255, 0, 153, 0.2);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        .generate-button {
+            background: linear-gradient(45deg, #0066ff, #3399ff);
+            color: white;
+        }
+
+        .generate-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.3);
+        }
+
+        .picsart-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .picsart-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .sticker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .sticker-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sticker-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(255, 0, 153, 0.2);
+        }
+
+        .sticker-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .sticker-info {
+            padding: 1.5rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .error {
+            color: #ff4d4d;
+            text-align: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 77, 77, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 77, 77, 0.2);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 3px solid rgba(255, 0, 153, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff0099;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Chat Widget Styles */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff0099, #ff4d94);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 0, 153, 0.3);
+            transition: all 0.3s;
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 0, 153, 0.4);
+        }
+
+        .chat-icon {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        .chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.95);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-window.active {
+            display: flex;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .agent-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff0099, #ff4d94);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .agent-info h3 {
+            color: white;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .agent-info p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+            font-size: 0.8rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.8rem 1rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .message.user {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.agent {
+            background: linear-gradient(45deg, #ff0099, #ff4d94);
+            color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: #ff0099;
+        }
+
+        .send-button {
+            padding: 0.8rem;
+            background: linear-gradient(45deg, #ff0099, #ff4d94);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 0, 153, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <nav class="nav">
+        <a href="#" class="nav-logo">Picsart</a>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Create</a>
+            <a href="#" class="nav-link">For Businesses</a>
+            <a href="#" class="nav-link">Learn & Connect</a>
+            <a href="#" class="nav-link">Pricing</a>
+            <a href="#" class="nav-button">Start creating</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="hero">
+            <div class="hero-content">
+                <h1>Create free custom stickers with the sticker maker</h1>
+                <p class="subtitle">Why spend hours searching for the perfect sticker when you can create your very own? Effortlessly customize your photos and express yourself in conversations with personalized stickers that just scream at you.</p>
+            </div>
+            <div class="hero-image"></div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="prompt" placeholder="Describe your sticker (e.g., 'cute cat playing with yarn')">
+            </div>
+            <div class="button-group">
+                <button class="generate-button" onclick="generateStickers()">Generate Stickers</button>
+                <button class="picsart-button" onclick="window.open('https://picsart.com/create/editor?templateSize=square&category=stickers&app=t2s2&version=1.8.2', '_blank')">
+                    Open Picsart Editor
+                </button>
+            </div>
+            <div class="loading" id="loading">✨ Generating your stickers...</div>
+            <div class="error" id="error"></div>
+            <div class="sticker-grid" id="stickerGrid"></div>
+        </div>
+    </div>
+
+    <div class="chat-widget">
+        <button class="chat-button" onclick="toggleChat()">
+            <svg class="chat-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+            </svg>
+        </button>
+        <div class="chat-window" id="chatWindow">
+            <div class="chat-header">
+                <div class="agent-avatar">🎨</div>
+                <div class="agent-info">
+                    <h3>Sticker Buddy</h3>
+                    <p>AI Sticker Assistant</p>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message agent">
+                    Hi! I'm Sticker Buddy, your AI assistant. I can help you create amazing stickers and answer any questions about the sticker maker. How can I help you today?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                <button class="send-button" onclick="sendMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function generateStickers() {
+            const prompt = document.getElementById('prompt').value;
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const stickerGrid = document.getElementById('stickerGrid');
+
+            if (!prompt) {
+                error.textContent = 'Please enter a description for your sticker';
+                return;
+            }
+
+            loading.style.display = 'block';
+            error.textContent = '';
+            stickerGrid.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/generate-stickers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to generate stickers');
+                }
+
+                data.stickers.forEach(sticker => {
+                    const card = document.createElement('div');
+                    card.className = 'sticker-card';
+                    card.innerHTML = `
+                        <img src="${sticker.image_url}" alt="${prompt}" class="sticker-image">
+                        <div class="sticker-info">
+                            <p>${prompt}</p>
+                        </div>
+                    `;
+                    stickerGrid.appendChild(card);
+                });
+            } catch (err) {
+                error.textContent = err.message;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.classList.toggle('active');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Clear input
+            input.value = '';
+
+            // Add user message to chat
+            addMessage(message, 'user');
+
+            try {
+                // Show typing indicator
+                addMessage('...', 'agent', 'typing-indicator');
+
+                // Send message to backend
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get response');
+                }
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                removeTypingIndicator();
+
+                // Add agent response
+                addMessage(data.response, 'agent');
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage('Sorry, I encountered an error. Please try again.', 'agent');
+            }
+        }
+
+        function addMessage(text, sender, className = '') {
+            const messages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender} ${className}`;
+            messageDiv.textContent = text;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.querySelector('.typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html> 
